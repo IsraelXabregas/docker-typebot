@@ -1,0 +1,59 @@
+version: "3.8"
+services:
+  builder:
+    image: baptistearno/typebot-builder:2.16.0
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - nlb_ingress
+    environment: &env
+      DATABASE_URL: ${DATABASE_URL}
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      NEXT_PUBLIC_VIEWER_URL: ${NEXT_PUBLIC_VIEWER_URL}
+      ENCRYPTION_SECRET: ${ENCRYPTION_SECRET}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      NEXT_PUBLIC_SMTP_FROM: ${NEXT_PUBLIC_SMTP_FROM}
+      SMTP_SECURE: ${SMTP_SECURE}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_BUCKET: ${S3_BUCKET}
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      DISABLE_SIGNUP: ${DISABLE_SIGNUP}
+
+  viewer:
+    image: baptistearno/typebot-viewer:2.16.0
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints: [node.role == manager]
+    networks:
+      - nlb_ingress
+    environment: *env
+
+networks:
+  nlb_ingress:
+    external: true
